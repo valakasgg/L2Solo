@@ -1,6 +1,7 @@
 const ServerResponse = invoke('AuthenticationServer/Network/Response');
 const ReceivePacket  = invoke('Packet/Receive');
 const Database       = invoke('Database');
+const AccountName    = invoke('AccountName');
 
 function authLogin(session, buffer) {
     const packet = new ReceivePacket(buffer);
@@ -21,6 +22,13 @@ function authLogin(session, buffer) {
 }
 
 function consume(session, data) {
+    // Refuse logins the client mangled with a non-Latin keyboard layout
+    // instead of auto-creating an account the player never typed (#131).
+    if (!AccountName.isValid(data.username)) {
+        console.log(`AuthServer :: rejected login, ${AccountName.reason(data.username)}`);
+        return failure(session, 0x03); // USER_OR_PASS_WRONG
+    }
+
     Database.fetchUserPassword(data.username).then((rows) => {
         const account = rows[0];
         const password = account?.password;
@@ -54,3 +62,5 @@ function failure(session, reason) {
 }
 
 module.exports = authLogin;
+// Exposed so the account-name gate can be tested without an RSA block.
+module.exports.consumeForTests = consume;

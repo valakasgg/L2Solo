@@ -380,6 +380,7 @@ const tests = [
     'tests/test_c4_buff_modifiers.js',
     'tests/test_c4_protocol_packets.js',
     'tests/test_auth_server_advertised_hostname.js',
+    'tests/test_account_name_validation.js',
     'tests/test_cast_interrupt.js',
     'tests/test_character_write_queue.js',
     'tests/test_database_checkpoint_worker.js',

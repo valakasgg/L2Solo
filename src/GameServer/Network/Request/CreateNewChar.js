@@ -65,6 +65,13 @@ function consume(session, data) {
                     Shared.fetchCharacters(session.accountId).then((characters) => {
                         Shared.enterCharacterHall(session, characters);
                     });
+                }).catch((error) => {
+                    // A rejected lookup here used to surface as an unhandled
+                    // rejection and take the server down (#131).
+                    console.log(`GameServer :: character creation failed, ${error.message}`);
+                    session.dataSendToMe(
+                        ServerResponse.charCreateFail(0x01)
+                    );
                 });
             });
         }
