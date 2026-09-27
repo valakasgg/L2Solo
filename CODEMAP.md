@@ -160,16 +160,63 @@ Social/CombatHelpMemory.js        ClanHall/Doors.js
 `PopulationDirector.realPlayerLevels()` (lines 64-75) already iterates **all** online human
 sessions and takes a median, so the population layer is not hard-wired to one player.
 
-The 0.5 spike should therefore focus on:
+### Social memory is already per-player ✅
+
+`src/GameServer/Bot/AI/BotSocialMemory.js` keys every record on the **pair**
+`(playerId, botId)` — `key(playerId, botId)` returns `` `${playerId}:${botId}` `` and the table has
+`ON CONFLICT(playerId, botId)`. Player-to-bot trust/familiarity is therefore already multi-human
+safe at the schema level; this is **not** a 0.5 risk.
+
+The separate, larger `Social/InteractionMemoryRuntime` (bot-to-bot) is likewise directed and
+character-keyed — `sourceId`/`targetId` are character IDs, with at most 32 character relations,
+8 clan and 8 alliance impressions per rememberer, seven-day half-life decay. Read
+`src/GameServer/Social/INTERACTION_MEMORY.md` (213 lines) before touching anything social; it is
+the most detailed design doc in the tree and it documents the hot/cold contract precisely.
+
+### What the 0.5 spike should actually focus on
+
 1. **Hot-zone union** — `HotActivation` / `activationRadius` is computed around players; confirm it
-   unions rather than picks one.
-2. **Social memory keying** — `Social/CombatHelpMemory.js` and bot reputation: per-player or global?
-3. **Chat routing** — `Speak.js`, and the clan/party LLM conversation history, which README
-   describes as a single shared bounded buffer per clan.
+   unions all online humans rather than picking one.
+2. **Chat routing** — `Speak.js`, and the clan LLM conversation history, which the README describes
+   as a *single shared bounded buffer per clan*, expiring after 30 minutes. With several humans in
+   one clan that buffer is shared, which may or may not be what you want.
+3. **Companion ownership** — `.bot` / `.botparty` assume the invoking session; check two humans
+   cannot recruit the same companion.
 
 ⚠️ Note the account-prefix convention: **never create a friend account starting with `bot_`.**
 
+### In-tree design docs (read these before the relevant phase)
+
+| Doc | Lines | Relevant to |
+|---|---:|---|
+| `src/GameServer/Social/INTERACTION_MEMORY.md` | 213 | 0.5 multi-human, Phase 2 realism |
+| `src/GameServer/Bot/Population/COLD_COMPETITION.md` | 566 | cold PvP, resource disputes, hot/cold parity |
+| `src/GameServer/Clan/CLAN_SOCIAL.md` | 104 | Phase 2 clan tiers and reputation |
+| `src/GameServer/Bot/AI/CLASS_POLICY.md` | 164 | class combat policy |
+
 ---
+
+## 5b. Offline tooling (no client, no geodata)
+
+Beyond `npm run check` and `npm test`:
+
+| Tool | What it does |
+|---|---|
+| `scripts/run-simulations.js` | Boots **three parallel server instances** on separate ports/databases (8091-3 / 2111-3 / 7781-3 / 8181-3), writing generated `config.ini` per instance under `tmp/simulations/` |
+| `npm run load:mixed` | Headless load test with SLO thresholds: schedule p95/p99/max, handler p95/p99, observer latency, event-loop max |
+| `scripts/hot-bot-load-test.js` | Hot-bot-only load path |
+| `scripts/benchmark-interaction-memory.js` | 2,000 full 48-relation views, 100k assessments, heap growth after GC — no server, no SQL |
+| `scripts/benchmark-town-navigation.js`, `validate-town-navigation.js` | Navigation timing and correctness |
+| `scripts/check-quest-registry.js`, `npm run check:knowledge-base` | Generated-data invariants |
+| `scripts/simulate-bot-chat.js` | Bot chat without a client |
+| `scripts/database-access.js`, `saved-games.js`, `world-wipe.js`, `wipe-bots.js` | World state management |
+
+`run-simulations.js` is also independent confirmation that the multi-instance pattern in the
+Windows guide is how upstream expects the server to be run side by side.
+
+Existing parity pattern to copy: `tests/test_bot_class_cold_parity.js` builds a fake hot actor and
+a cold profile, drives both with identical inputs across every class/level/HP/MP combination, and
+asserts identical decisions.
 
 ## 6. Suggested next steps (revised)
 
@@ -180,3 +227,18 @@ The 0.5 spike should therefore focus on:
    `test_hot_cold_progression_parity.js` to extend; it has to be built.
 5. Decide the director question (§3) — this is an owner decision, not a code decision.
 6. Then 1.1/1.2 bot rates at the three hook sites in §2.
+
+---
+
+## 7. Upstream state (verified 2026-09-27)
+
+- Default branch is `main`. **Upstream has no `dev` branch** — it merges feature branches straight
+  into `main` by PR. Our `dev`/`main` split is our own convention and does not conflict.
+- **0 open PRs.** The five non-`main` branches on the remote
+  (`agent/bot-personas-wealth-friendship`, `feature/third-class-progression`,
+  `agent/deep-blue-drop-rules`, `fix/control-effect-runtime`, `town-navigation-server-dase`) are
+  all already merged into `main` — stale leftovers, not work in flight. So `upstream/main` is the
+  complete picture and there is nothing to duplicate right now.
+- External contributors appear in merged PRs (`razzraziel`, `Sedentarius`), so upstream does accept
+  outside work — relevant to the "offer generic improvements upstream" rule.
+- Our `dev` is 2 ahead / 0 behind `upstream/main` at `2eeb182b`.
