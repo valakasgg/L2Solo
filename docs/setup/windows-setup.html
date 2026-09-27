@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>L2Solo — Windows Setup &amp; Test Guide</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+  @page { @bottom-right { content: counter(page); } }
+
+  :root {
+    --ink: #14181d;
+    --muted: #5b6672;
+    --rule: #d8dee6;
+    --accent: #1d5fa8;
+    --code-bg: #f4f6f9;
+    --warn-bg: #fff6e8;
+    --warn-bd: #e0a33a;
+    --stop-bg: #fdeeee;
+    --stop-bd: #c94a4a;
+    --ok-bg: #eef7f0;
+    --ok-bd: #4a9c63;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font: 10.4pt/1.52 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  code, pre, .mono { font-family: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+
+  h1 { font-size: 23pt; line-height: 1.15; margin: 0 0 6px; letter-spacing: -0.4px; }
+  h2 {
+    font-size: 14.5pt; margin: 26px 0 10px; padding-bottom: 5px;
+    border-bottom: 2px solid var(--ink); letter-spacing: -0.2px;
+    break-after: avoid;
+  }
+  h3 { font-size: 11.6pt; margin: 18px 0 6px; break-after: avoid; }
+  h4 { font-size: 10.4pt; margin: 14px 0 4px; color: var(--muted);
+       text-transform: uppercase; letter-spacing: 0.6px; font-size: 8.6pt; break-after: avoid; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 0 0 10px; padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  a { color: var(--accent); text-decoration: none; word-break: break-all; }
+
+  pre {
+    background: var(--code-bg); border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+    border-radius: 3px; padding: 9px 11px; font-size: 8.9pt; line-height: 1.45;
+    overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+    margin: 8px 0 11px; break-inside: avoid;
+  }
+  pre .c { color: #6a7480; }
+  code:not(pre code) {
+    background: var(--code-bg); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 0.5px 4px; font-size: 9pt;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9.2pt; break-inside: avoid; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { background: var(--code-bg); font-size: 8.4pt; text-transform: uppercase; letter-spacing: 0.5px; }
+  td.mono, th.mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.7pt; }
+
+  .box { padding: 9px 12px; border-radius: 3px; margin: 10px 0 12px; font-size: 9.6pt; break-inside: avoid; }
+  .box p:last-child { margin-bottom: 0; }
+  .box .lbl { font-weight: 700; text-transform: uppercase; font-size: 8.2pt; letter-spacing: 0.7px; display: block; margin-bottom: 3px; }
+  .warn { background: var(--warn-bg); border-left: 3px solid var(--warn-bd); }
+  .warn .lbl { color: #a06a10; }
+  .stop { background: var(--stop-bg); border-left: 3px solid var(--stop-bd); }
+  .stop .lbl { color: var(--stop-bd); }
+  .ok   { background: var(--ok-bg);   border-left: 3px solid var(--ok-bd); }
+  .ok .lbl { color: #2f7347; }
+
+  .cover { padding-top: 40mm; text-align: left; break-after: page; }
+  .cover .sub { font-size: 13pt; color: var(--muted); margin: 6px 0 26px; }
+  .cover .meta { font-size: 9.4pt; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 30mm; }
+  .cover .meta b { color: var(--ink); }
+
+  .toc { break-after: page; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: toc; }
+  .toc ol > li { counter-increment: toc; padding: 3px 0; border-bottom: 1px dotted var(--rule); font-size: 10pt; }
+  .toc ol > li::before { content: counter(toc) ". "; color: var(--muted); font-family: monospace; }
+
+  .figure { margin: 12px 0 16px; break-inside: avoid; }
+  .figure svg { display: block; border: 1px solid var(--rule); border-radius: 3px; background: #fff; }
+  .figcap { font-size: 8.6pt; color: var(--muted); margin: 6px 2px 0; }
+
+  .step { break-inside: avoid; }
+  .lead { font-size: 10.8pt; color: var(--muted); margin-bottom: 14px; }
+  .pagebreak { break-before: page; }
+  hr.soft { border: 0; border-top: 1px solid var(--rule); margin: 16px 0; }
+  .kv { font-size: 9.3pt; }
+  .kv td:first-child { width: 34%; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────────── COVER ───────────────────────────── -->
+<section class="cover">
+  <h1>L2Solo<br>Windows Setup &amp; Test Guide</h1>
+  <p class="sub">Getting your fork running, playable and testable on the Windows PC</p>
+
+  <div class="meta">
+    <p><b>Fork:</b> github.com/valakasgg/L2Solo &nbsp;·&nbsp; <b>Upstream:</b> github.com/pmbstyle/L2Solo</p>
+    <p><b>Verified against:</b> upstream <span class="mono">main</span> @ <span class="mono">2eeb182b</span>, 27 September 2026</p>
+    <p><b>Node:</b> 22.18.0 (pinned in <span class="mono">.nvmrc</span>) &nbsp;·&nbsp; <b>Client:</b> Lineage II C4, protocol 656</p>
+    <p><b>Companion docs:</b> <span class="mono">HANDOVER.md</span> (project brief) · <span class="mono">CODEMAP.md</span> (code map)</p>
+  </div>
+</section>
+
+<!-- ───────────────────────────── TOC ───────────────────────────── -->
+<section class="toc">
+  <h2 style="margin-top:0">Contents</h2>
+  <ol>
+    <li>What you are building</li>
+    <li>Prerequisites on the Windows PC</li>
+    <li>The game client and client mod</li>
+    <li>Clone your fork and first run (TEST copy)</li>
+    <li>First login and character creation</li>
+    <li>The second copy (LIVE) on separate ports</li>
+    <li>Playing from another PC, and friends over VPN</li>
+    <li>The development loop: Mac → GitHub → Windows</li>
+    <li>Saves, backups, wipes and rollback</li>
+    <li>Configuration cheat sheet</li>
+    <li>In-game commands</li>
+    <li>Troubleshooting</li>
+    <li>Appendix: ports and paths</li>
+  </ol>
+</section>
+
+<!-- ───────────────────────────── 1 ───────────────────────────── -->
+<h2>1. What you are building</h2>
+
+<p class="lead">Two independent copies of the server on one Windows PC, fed by your GitHub fork,
+which you develop against from the Mac.</p>
+
+<div class="figure">
+<svg viewBox="0 0 680 318" width="100%" role="img" aria-label="Architecture: Mac develops, GitHub stores, Windows runs test and live copies">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#44525f"/>
+    </marker>
+  </defs>
+  <style>
+    .bx  { fill:#ffffff; stroke:#44525f; stroke-width:1.2; }
+    .bxa { fill:#f2f6fa; stroke:#1d5fa8; stroke-width:1.2; }
+    .bxl { fill:#f7f9fb; stroke:#8d9aa7; stroke-width:1; stroke-dasharray:3 2; }
+    .hd  { font:700 9.5px Helvetica,Arial,sans-serif; fill:#14181d; }
+    .tx  { font:8.2px Helvetica,Arial,sans-serif; fill:#3b4650; }
+    .mn  { font:8px Menlo,Consolas,monospace; fill:#14181d; }
+    .lb  { font:700 7.4px Helvetica,Arial,sans-serif; fill:#1d5fa8; }
+    .cap { font:700 7.2px Helvetica,Arial,sans-serif; fill:#6a7480; letter-spacing:.7px; }
+    .ar  { stroke:#44525f; stroke-width:1.3; fill:none; marker-end:url(#ah); }
+  </style>
+
+  <text class="cap" x="8"   y="12">MAC — DEVELOPMENT</text>
+  <text class="cap" x="216" y="12">GITHUB</text>
+  <text class="cap" x="400" y="12">WINDOWS PC — RUNS EVERYTHING</text>
+
+  <rect class="bxl" x="8" y="22" width="150" height="40" rx="3"/>
+  <text class="hd" x="18" y="38">upstream</text>
+  <text class="mn" x="18" y="52">pmbstyle/L2Solo</text>
+
+  <rect class="bxa" x="8" y="108" width="150" height="86" rx="3"/>
+  <text class="hd" x="18" y="126">Your working copy</text>
+  <text class="mn" x="18" y="141">~/Development/</text>
+  <text class="mn" x="18" y="152">  random/l2solo/L2Solo</text>
+  <text class="tx" x="18" y="169">branch: dev</text>
+  <text class="tx" x="18" y="183">Claude Code edits here</text>
+
+  <path class="ar" d="M 83 62 L 83 104"/>
+  <text class="lb" x="89" y="87">merge upstream/main</text>
+
+  <rect class="bx" x="214" y="86" width="126" height="122" rx="3"/>
+  <text class="hd" x="224" y="106">valakasgg/L2Solo</text>
+  <line x1="224" y1="114" x2="330" y2="114" stroke="#d8dee6"/>
+  <text class="mn" x="224" y="132">dev</text>
+  <text class="tx" x="224" y="144">work in progress</text>
+  <path class="ar" d="M 232 150 L 232 160"/>
+  <text class="mn" x="224" y="174">main</text>
+  <text class="tx" x="224" y="186">known good</text>
+  <text class="lb" x="247" y="157">merge when good</text>
+
+  <path class="ar" d="M 158 145 L 210 145"/>
+  <text class="lb" x="164" y="139">push dev</text>
+
+  <rect class="bx" x="400" y="26" width="272" height="76" rx="3"/>
+  <text class="hd" x="412" y="45">C:\L2Solo-test</text>
+  <text class="tx" x="412" y="60">branch dev · only you · you break things here</text>
+  <text class="mn" x="412" y="76">2116 login · 7787 game</text>
+  <text class="mn" x="412" y="89">8098 observer · 8100 launcher</text>
+
+  <rect class="bxa" x="400" y="126" width="272" height="76" rx="3"/>
+  <text class="hd" x="412" y="145">C:\L2Solo-live</text>
+  <text class="tx" x="412" y="160">branch main · friends play here</text>
+  <text class="mn" x="412" y="176">2106 login · 7777 game</text>
+  <text class="mn" x="412" y="189">8088 observer · 8090 launcher</text>
+
+  <path class="ar" d="M 340 126 C 368 126 366 64 396 64"/>
+  <text class="lb" x="345" y="100">pull dev</text>
+
+  <path class="ar" d="M 340 172 C 366 172 370 164 396 164"/>
+  <text class="lb" x="345" y="188">pull main</text>
+
+  <rect class="bxl" x="400" y="250" width="272" height="52" rx="3"/>
+  <text class="hd" x="412" y="268">Friends&#39; PCs</text>
+  <text class="tx" x="412" y="282">Tailscale → 100.x.x.x:7777</text>
+  <text class="tx" x="412" y="295">own C4 client, l2ini.py set 100.x.x.x</text>
+
+  <path class="ar" d="M 536 246 L 536 206"/>
+</svg>
+<p class="figcap">Two server copies on one Windows PC. The test copy tracks <code>dev</code> and is
+where things break; the live copy stays on <code>main</code> so a friend can log in at any time.</p>
+</div>
+
+<h3>Why two copies</h3>
+<p>The live copy stays on a known-good commit so a friend can log in at any time without you
+having to stop editing code. The test copy tracks <code>dev</code> and is where things break. They
+are separate folders, separate SQLite databases and separate ports, so they can run at the same
+time.</p>
+
+<div class="box warn">
+  <span class="lbl">Get this right the first time</span>
+  <p>Both copies must never share a database file. Issue #117 upstream ("database is locked") was
+  suspected to be two server instances pointing at one SQLite file. Separate clone folders give you
+  separate <code>tmp/</code> directories automatically — just don't override
+  <code>Database.path</code> to a shared location.</p>
+</div>
+
+<h3>Order of work</h3>
+<ol>
+  <li>Get <b>one</b> copy working end to end (sections 2–5). Do not set up the second copy until you
+  have logged a character in.</li>
+  <li>Clone it to the second folder and change ports (section 6).</li>
+  <li>Only then wire up friends and the VPN (section 7).</li>
+</ol>
+
+<!-- ───────────────────────────── 2 ───────────────────────────── -->
+<h2 class="pagebreak">2. Prerequisites on the Windows PC</h2>
+
+<table class="kv">
+  <tr><th>What</th><th>Version</th><th>Why</th></tr>
+  <tr><td>Node.js</td><td class="mono">22.18.0</td><td>Runs the server. <code>package.json</code> requires <code>&gt;=22.5.0</code>; we pin 22.18.0 in <code>.nvmrc</code></td></tr>
+  <tr><td>Git for Windows</td><td>any current</td><td>Pulls your fork</td></tr>
+  <tr><td>Lineage II C4 client</td><td>protocol 656</td><td>The game itself</td></tr>
+  <tr><td>Python 3</td><td>3.9+</td><td>Only for <code>l2ini.py</code> in section 7 (remote play). Skip if playing on the same PC</td></tr>
+  <tr><td>Free disk</td><td>~4 GB per copy</td><td>Geodata expands to ~900 MB; database and saves grow</td></tr>
+</table>
+
+<h3>2.1 Install Node 22</h3>
+<p>Use <b>nvm-windows</b> so you can hold 22.x regardless of what else you install later. Download
+<code>nvm-setup.exe</code> from <a href="https://github.com/coreybutler/nvm-windows/releases">github.com/coreybutler/nvm-windows/releases</a>,
+then in a <b>new</b> PowerShell window:</p>
+
+<pre>nvm install 22.18.0
+nvm use 22.18.0
+node -v          <span class="c"># must print v22.18.0</span>
+npm -v</pre>
+
+<p>If you would rather not use nvm, the plain installer from <a href="https://nodejs.org">nodejs.org</a>
+(choose the 22 LTS line, not 24) works fine.</p>
+
+<div class="box warn">
+  <span class="lbl">Do not use Node 24</span>
+  <p>It may appear to work — <code>engines</code> only asks for <code>&gt;=22.5.0</code> — but the
+  project is developed and tested on 22 LTS, and the SQLite integration is still flagged
+  experimental by Node. Matching 22.18.0 removes a whole class of "works on my machine" confusion
+  between your Mac and the Windows box.</p>
+</div>
+
+<h3>2.2 Install Git</h3>
+<p>From <a href="https://git-scm.com/download/win">git-scm.com/download/win</a>. Accept the defaults.
+Then confirm:</p>
+<pre>git --version</pre>
+
+<h3>2.3 Sign in to GitHub</h3>
+<p>The simplest route is the GitHub CLI — install from <a href="https://cli.github.com">cli.github.com</a>, then:</p>
+<pre>gh auth login          <span class="c"># choose HTTPS, authenticate in the browser</span></pre>
+<p>This also configures Git credentials, so <code>git pull</code> will not prompt later.</p>
+
+<!-- ───────────────────────────── 3 ───────────────────────────── -->
+<h2>3. The game client and client mod</h2>
+
+<p>The server does not ship the game. You need a clean C4 client speaking protocol 656.</p>
+
+<table class="kv">
+  <tr><th>File</th><th>Source</th><th>Required?</th></tr>
+  <tr><td>Clean C4 client (protocol 656)</td><td>Linked from the project README / Discord <code>#info</code></td><td><b>Yes</b></td></tr>
+  <tr><td>L2Solo client mod</td><td>Linked from README / Discord <code>#client-mod</code></td><td>Optional, recommended</td></tr>
+  <tr><td>Geodata pack (~209 MB zip → ~900 MB)</td><td>Downloaded automatically on first start</td><td>Automatic</td></tr>
+</table>
+
+<div class="box stop">
+  <span class="lbl">Legal boundary</span>
+  <p>Lineage II and its client are NCSOFT's property. Keep this server private to your group, do not
+  take money for it in any form, and do not redistribute the client. This is stated in
+  <code>HANDOVER.md</code> §8 and it is the single constraint most likely to cause you real trouble.</p>
+</div>
+
+<h3>3.1 Install the client</h3>
+<ol>
+  <li>Extract the client archive to a path with <b>no spaces and no non-ASCII characters</b>, for
+  example <code>C:\Games\L2-C4-live</code>.</li>
+  <li>Confirm it contains <code>system\L2.exe</code>. That folder — the one holding
+  <code>system</code> — is what the rest of this guide calls the <i>client root</i>.</li>
+  <li>If you took the client mod, extract it over the client root and let it overwrite.</li>
+</ol>
+
+<h3>3.2 Make a second client folder now</h3>
+<p>You will want one client per server copy, because each has the target address baked into
+<code>system\l2.ini</code>. Copy the whole folder:</p>
+<pre>Copy-Item -Recurse C:\Games\L2-C4-live C:\Games\L2-C4-test</pre>
+<p>Make desktop shortcuts to each <code>system\L2.exe</code> named <b>L2 LIVE</b> and <b>L2 TEST</b>
+so you never lose track of which world you are in.</p>
+
+<!-- ───────────────────────────── 4 ───────────────────────────── -->
+<h2 class="pagebreak">4. Clone your fork and first run (TEST copy)</h2>
+
+<p class="lead">Build the test copy first. It is the one you will be restarting constantly, and if
+you break it nobody else notices.</p>
+
+<h3>4.1 Clone</h3>
+<pre>cd C:\
+git clone https://github.com/valakasgg/L2Solo.git L2Solo-test
+cd C:\L2Solo-test
+git remote add upstream https://github.com/pmbstyle/L2Solo.git
+git fetch upstream
+git checkout dev</pre>
+
+<div class="box ok">
+  <span class="lbl">Already done for you</span>
+  <p>The fork exists, <code>upstream</code> is wired, and the <code>dev</code> branch has been pushed
+  with the handover, the code map, an <code>.nvmrc</code>, and the first fix. <code>git checkout dev</code>
+  will just work.</p>
+</div>
+
+<h3>4.2 Install dependencies</h3>
+<pre>nvm use 22.18.0
+npm install</pre>
+<p>Expect around 286 packages and a handful of deprecation warnings from the lint toolchain — those
+are upstream's and harmless. <code>npm audit</code> reports 3 high-severity advisories, also
+upstream's; they are in dev tooling, not the server runtime.</p>
+
+<h3>4.3 Sanity-check before you run anything</h3>
+<pre>npm run check    <span class="c"># syntax check, ~1600 files, takes seconds</span></pre>
+<p>Expect: <code>Syntax check passed for 1601 JavaScript files</code>. If this fails, stop — do not
+continue to the server.</p>
+
+<h3>4.4 Pre-download the geodata</h3>
+<p>Optional but strongly recommended, because doing it separately means a failure here is obviously a
+download problem rather than a mysterious server hang:</p>
+<pre>npm run geodata</pre>
+<p>~209 MB compressed, expanding to about 900 MB under <code>data\Geodata</code>. On a slow line this
+takes a while. If your network blocks it, the mirror can be overridden with
+<code>L2NODE_GEODATA_URL</code> and <code>L2NODE_GEODATA_SHA256</code>, or point at an existing copy
+with <code>L2NODE_GEODATA_DIR</code>.</p>
+
+<h3>4.5 Create your local config</h3>
+<p><code>config\default.ini</code> is committed and should not be edited. Your machine-specific
+settings go in <code>config\local.ini</code>, which is git-ignored. Create it now, with the test
+copy's ports:</p>
+
+<pre><span class="c"># C:\L2Solo-test\config\local.ini</span>
+
+[AuthServer]
+port = 2116
+
+[GameServer]
+port = 7787
+
+[WorldObserver]
+port = 8098
+
+[General]
+progressionPreset = x10</pre>
+
+<p>Keep <code>progressionPreset</code> at <code>x1</code> if you want the authentic grind; <code>x10</code>
+is far more practical while you are testing changes and need to reach level 40 repeatedly. Valid
+values are <code>x1</code>, <code>x10</code>, <code>x50</code>.</p>
+
+<h3>4.6 Start the server</h3>
+<pre>$env:L2NODE_LAUNCHER_PORT = 8100
+npm start</pre>
+
+<p>This starts the <b>L2Solo Launcher</b>, a small web UI. Open
+<a href="http://127.0.0.1:8100">http://127.0.0.1:8100</a> and press <b>Start</b>.</p>
+
+<p>Watch for a healthy boot: the auth server binding, the game server binding, geodata loading, then
+the bot population seeding (this is the slow part — <code>generatedColdSeedDelayMs</code> defaults to
+45 seconds before seeding even begins, and the world builds toward 1,700 bots from there).</p>
+
+<div class="box warn">
+  <span class="lbl">First boot is slow</span>
+  <p>Give it several minutes before concluding something is wrong. The world is being populated from
+  nothing. Subsequent starts reuse the database and are much faster.</p>
+</div>
+
+<h3>4.7 The World Observer</h3>
+<p>Once running, <a href="http://127.0.0.1:8098">http://127.0.0.1:8098</a> shows the live map,
+population, clans and market. This is the fastest way to confirm the simulation is actually alive,
+and it is where you will verify most of the bot-behaviour work in the roadmap.</p>
+
+<!-- ───────────────────────────── 5 ───────────────────────────── -->
+<h2 class="pagebreak">5. First login and character creation</h2>
+
+<ol>
+  <li>Launch <b>L2 TEST</b> (<code>C:\Games\L2-C4-test\system\L2.exe</code>).</li>
+  <li>At the login screen type any username and password. <code>autoCreate</code> is
+  <code>true</code>, so the account is created on first use — there is no registration step.</li>
+  <li>Pick the server from the list, create a character, and enter the world.</li>
+</ol>
+
+<div class="box stop">
+  <span class="lbl">Switch your keyboard to English before typing the login</span>
+  <p>If Windows starts the client with a non-Latin layout, the client can send mangled bytes in the
+  login field even after you switch back — <code>test1</code> arrives as <code>ôtest1</code>. On
+  upstream this silently created a <i>second</i> account, so next session you would find an empty
+  character hall; in the worst case it crashed the login server outright (upstream issue #131).</p>
+  <p>Your <code>dev</code> branch already fixes this: malformed logins are now refused with a clear
+  error instead of creating a phantom account. If you get "user or password wrong" while certain you
+  typed it correctly, this is why — switch layout and retype.</p>
+</div>
+
+<div class="box warn">
+  <span class="lbl">Never use an account name starting with <code>bot_</code></span>
+  <p>The server distinguishes humans from bots by exactly that prefix
+  (<code>!accountId.startsWith('bot_')</code>), in a dozen places including the population director,
+  chat routing and clan invites. An account named <code>bot_nathan</code> would be treated as
+  simulation, not a player.</p>
+</div>
+
+<h3>Confirming it actually works</h3>
+<p>You have a working setup when all four are true:</p>
+<ul>
+  <li>You are in the world and can move.</li>
+  <li>You can see other characters in town who are not you — those are bots.</li>
+  <li>The Observer at <code>:8098</code> shows a population count climbing.</li>
+  <li><code>.bs</code> in chat opens the bot status panel.</li>
+</ul>
+
+<!-- ───────────────────────────── 6 ───────────────────────────── -->
+<h2>6. The second copy (LIVE) on separate ports</h2>
+
+<p>Only do this once section 5 succeeded.</p>
+
+<pre>cd C:\
+git clone https://github.com/valakasgg/L2Solo.git L2Solo-live
+cd C:\L2Solo-live
+git remote add upstream https://github.com/pmbstyle/L2Solo.git
+git checkout main
+nvm use 22.18.0
+npm install</pre>
+
+<p>Give it the default ports in <code>C:\L2Solo-live\config\local.ini</code>:</p>
+
+<pre><span class="c"># C:\L2Solo-live\config\local.ini</span>
+
+[AuthServer]
+port = 2106
+
+[GameServer]
+port = 7777
+<span class="c">; uncomment once you know the address friends will reach you on — see §7</span>
+<span class="c">; advertisedHostname = 100.92.15.42</span>
+
+[WorldObserver]
+hostname = 0.0.0.0
+port = 8088
+
+[General]
+progressionPreset = x10</pre>
+
+<p>Start it on the default launcher port:</p>
+<pre>cd C:\L2Solo-live
+npm start                  <span class="c"># launcher on 8090</span></pre>
+
+<h3>Copy the geodata instead of downloading it twice</h3>
+<pre>Copy-Item -Recurse C:\L2Solo-test\data\Geodata C:\L2Solo-live\data\Geodata</pre>
+
+<div class="box warn">
+  <span class="lbl">WorldObserver binds to localhost by default</span>
+  <p><code>hostname = 127.0.0.1</code> in <code>default.ini</code> means only the Windows PC can open
+  the Observer. Setting <code>0.0.0.0</code> as above exposes it to your LAN and VPN so friends can
+  see the map too. Only do that on a private network — it is an unauthenticated diagnostics page.</p>
+</div>
+
+<h3>Running both at once</h3>
+<table class="kv">
+  <tr><th>&nbsp;</th><th>TEST</th><th>LIVE</th></tr>
+  <tr><td>Folder</td><td class="mono">C:\L2Solo-test</td><td class="mono">C:\L2Solo-live</td></tr>
+  <tr><td>Branch</td><td class="mono">dev</td><td class="mono">main</td></tr>
+  <tr><td>Login port</td><td class="mono">2116</td><td class="mono">2106</td></tr>
+  <tr><td>Game port</td><td class="mono">7787</td><td class="mono">7777</td></tr>
+  <tr><td>Observer</td><td class="mono">8098</td><td class="mono">8088</td></tr>
+  <tr><td>Launcher</td><td class="mono">8100</td><td class="mono">8090</td></tr>
+  <tr><td>Client</td><td class="mono">C:\Games\L2-C4-test</td><td class="mono">C:\Games\L2-C4-live</td></tr>
+</table>
+
+<!-- ───────────────────────────── 7 ───────────────────────────── -->
+<h2 class="pagebreak">7. Playing from another PC, and friends over VPN</h2>
+
+<p>Everything so far assumed you play on the same machine that runs the server. Two changes are
+needed to play from elsewhere.</p>
+
+<h3>7.1 Tell the server what address to advertise</h3>
+<p>After login, the login server hands the client an address for the game server. By default it
+guesses, and on a multi-homed or VPN'd machine it guesses wrong — the client then tries to connect to
+<code>127.0.0.1</code> and hangs at the character screen. Set it explicitly in
+<code>config\local.ini</code>:</p>
+
+<pre>[GameServer]
+advertisedHostname = 192.168.1.50      <span class="c"># LAN address of the Windows PC</span></pre>
+
+<p>Find that address with <code>ipconfig</code>. Make sure TCP <b>2106</b> and <b>7777</b> are allowed
+through Windows Firewall:</p>
+
+<pre>New-NetFirewallRule -DisplayName "L2Solo login" -Direction Inbound -Protocol TCP -LocalPort 2106 -Action Allow
+New-NetFirewallRule -DisplayName "L2Solo game"  -Direction Inbound -Protocol TCP -LocalPort 7777 -Action Allow</pre>
+
+<h3>7.2 Point the client at the server</h3>
+<p>The client's target lives in <code>system\l2.ini</code>, which the L2Solo client uses in the
+encrypted <code>Lineage2Ver413</code> format and cannot be edited in a text editor. Use
+<code>l2ini.py</code> (from the Discord <code>#guides</code> forum post "Running L2Solo on a Separate
+Server"), run from the client's <code>system</code> folder:</p>
+
+<pre>python3 l2ini.py status
+python3 l2ini.py set 192.168.1.50</pre>
+
+<p>Verify from the playing PC before launching the game:</p>
+<pre>Test-NetConnection 192.168.1.50 -Port 2106
+Test-NetConnection 192.168.1.50 -Port 7777</pre>
+<p>Both must report <code>TcpTestSucceeded : True</code>.</p>
+
+<h3>7.3 Friends, over Tailscale</h3>
+<p>Do <b>not</b> port-forward 2106/7777 to the open internet. Install
+<a href="https://tailscale.com">Tailscale</a> on the Windows PC and on each friend's PC, join them to
+the same tailnet, then use the Windows PC's <code>100.x.x.x</code> address everywhere:</p>
+
+<pre><span class="c"># on the server, config\local.ini</span>
+[GameServer]
+advertisedHostname = 100.92.15.42
+
+<span class="c"># on each friend's client, in its system folder</span>
+python3 l2ini.py set 100.92.15.42</pre>
+
+<p>Each friend also needs their own copy of the client, with the client mod if you are using it.
+They log in with any username; accounts are created on first use.</p>
+
+<div class="box warn">
+  <span class="lbl">Only one server can advertise a given address</span>
+  <p>If you want friends on LIVE while you test on TEST, only LIVE should carry the Tailscale
+  <code>advertisedHostname</code>. Leave TEST on its default local detection and play it from the
+  Windows PC itself.</p>
+</div>
+
+<!-- ───────────────────────────── 8 ───────────────────────────── -->
+<h2>8. The development loop: Mac → GitHub → Windows</h2>
+
+<h4>On the Mac</h4>
+<pre>cd ~/Development/random/l2solo/L2Solo
+git checkout dev
+<span class="c"># ... Claude Code makes changes ...</span>
+npm run check &amp;&amp; npm test
+git add -A &amp;&amp; git commit -m "..." &amp;&amp; git push origin dev</pre>
+
+<h4>On the Windows PC (TEST)</h4>
+<pre>cd C:\L2Solo-test
+git pull origin dev
+npm install           <span class="c"># only when package.json changed</span>
+<span class="c"># restart via the launcher at :8100</span></pre>
+
+<h4>Promoting a good build to LIVE</h4>
+<pre><span class="c"># Mac</span>
+git checkout main &amp;&amp; git merge dev &amp;&amp; git push origin main
+git tag -a good-2026-09-27 -m "known good" &amp;&amp; git push origin --tags
+
+<span class="c"># Windows, with nobody online, after a save (see §9)</span>
+cd C:\L2Solo-live
+git pull origin main</pre>
+
+<h4>Staying current with upstream</h4>
+<p>Upstream ships large PRs every few days. Merge often, in small steps, or the conflicts become
+unmanageable:</p>
+<pre>git checkout dev
+git fetch upstream
+git merge upstream/main
+npm run check &amp;&amp; npm test</pre>
+
+<div class="box warn">
+  <span class="lbl">Never commit these</span>
+  <p><code>config/local.ini</code>, the SQLite database, <code>tmp/</code>, saves, and any API key.
+  <code>local.ini</code> is already git-ignored — keep it that way, and keep your OpenRouter key out
+  of <code>default.ini</code>.</p>
+</div>
+
+<!-- ───────────────────────────── 9 ───────────────────────────── -->
+<h2 class="pagebreak">9. Saves, backups, wipes and rollback</h2>
+
+<h3>Saved games</h3>
+<p>In the launcher, with the server <b>stopped</b>, use <b>Saved Games</b> to snapshot the whole world
+database. Saves land in <code>tmp\saves</code>, named or auto-named, with no limit beyond disk space.
+<b>Load</b> replaces the current database and leaves the server stopped. <b>Delete</b> is permanent.
+Both ask for confirmation.</p>
+
+<div class="box stop">
+  <span class="lbl">Loading never auto-backs-up</span>
+  <p>All saves are manual. If you Load over a world you had not saved, that world is gone. Save before
+  every upgrade of the LIVE copy — this is the one irreversible operation in the whole setup.</p>
+</div>
+
+<h3>Config is not part of a save</h3>
+<p><code>local.ini</code> and launcher settings are excluded. Back those up yourself:</p>
+<pre>Copy-Item C:\L2Solo-live\config\local.ini C:\L2Solo-backups\local.ini.2026-09-27</pre>
+
+<h3>Wiping bots without wiping yourself</h3>
+<pre>npm run wipe:bots</pre>
+<p>Useful after changing population or rate settings, when you want a fresh simulation but intend to
+keep your character.</p>
+
+<h3>Rollback</h3>
+<pre>cd C:\L2Solo-live
+git checkout good-2026-09-27     <span class="c"># the tag you pushed earlier</span>
+npm install
+<span class="c"># then Load the matching save in the launcher</span></pre>
+
+<!-- ───────────────────────────── 10 ───────────────────────────── -->
+<h2>10. Configuration cheat sheet</h2>
+
+<p>Everything below goes in <code>config\local.ini</code>, never <code>default.ini</code>. Full
+annotated list: the <code>#guides</code> forum post "Server settings with description", mirrored in
+<code>discord-export/guides.md</code>.</p>
+
+<h4>Rates</h4>
+<table class="kv">
+  <tr><th>Key</th><th>Default</th><th>Notes</th></tr>
+  <tr><td class="mono">General.progressionPreset</td><td class="mono">x1</td><td><code>x1</code> / <code>x10</code> / <code>x50</code>. Multiplies everything below</td></tr>
+  <tr><td class="mono">General.expRate</td><td class="mono">1.0</td><td>SP inherits this unless <code>spRate</code> is set</td></tr>
+  <tr><td class="mono">General.adenaRate</td><td class="mono">1.0</td><td></td></tr>
+  <tr><td class="mono">General.dropChanceRate</td><td class="mono">1.0</td><td>Spoil inherits unless <code>spoilRate</code> is set</td></tr>
+  <tr><td class="mono">General.maxLevel</td><td class="mono">78</td><td></td></tr>
+  <tr><td class="mono">Progression.contentCap</td><td class="mono">78</td><td>Must not exceed <code>maxLevel</code> or the server refuses to start</td></tr>
+</table>
+<p><code>progressionPreset = x10</code> with <code>expRate = 2.0</code> gives 20× EXP. Quest rewards
+scale with the preset; quest <i>objective</i> item counts do not.</p>
+
+<h4>Bot population</h4>
+<table class="kv">
+  <tr><th>Key</th><th>Default</th><th>Notes</th></tr>
+  <tr><td class="mono">BotPopulation.maxPlayingPopulation</td><td class="mono">1700</td><td>Clamped 0–2000. Lower it if the PC struggles</td></tr>
+  <tr><td class="mono">BotPopulation.pvpAggression</td><td class="mono">0.5</td><td>0–1. Restart to apply</td></tr>
+  <tr><td class="mono">BotPopulation.directorEnabled</td><td class="mono">true</td><td><b>See the warning below</b></td></tr>
+  <tr><td class="mono">BotPopulation.ambientScenesEnabled</td><td class="mono">true</td><td>Short social scenes between bots</td></tr>
+</table>
+
+<div class="box stop">
+  <span class="lbl">directorEnabled conflicts with your design</span>
+  <p><code>PopulationDirector.pressureForState()</code> gives cold bots more than <b>2 levels below
+  your group's median</b> up to <b>1.35× XP</b>, and bots more than 2 levels above it only
+  <b>0.85×</b>. That is a catch-up mechanic that pulls the whole population toward your level — the
+  opposite of the "players at every level" design in <code>HANDOVER.md</code> §4.</p>
+  <p>Setting <code>directorEnabled = false</code> is too blunt: it also kills the <i>newbie anchor</i>
+  that keeps ~12% of bots at level ≤5, which you <i>do</i> want. See <code>CODEMAP.md</code> §3 —
+  this needs a small code change, not a config flip.</p>
+</div>
+
+<h4>AI chat (optional)</h4>
+<pre>[AI]
+enabled = true
+apiUrl = http://127.0.0.1:1234/v1/chat/completions
+apiKey = lm-studio
+model = &lt;model-id-from-the-provider&gt;
+partyRouterModel = &lt;model-id-from-the-provider&gt;</pre>
+<p>For Ollama use <code>http://127.0.0.1:11434/v1/chat/completions</code> and a pulled tag such as
+<code>llama3.2</code>. Bots work fine with this disabled — it only affects conversational chat, not
+behaviour.</p>
+
+<!-- ───────────────────────────── 11 ───────────────────────────── -->
+<h2 class="pagebreak">11. In-game commands</h2>
+
+<table class="kv">
+  <tr><th>Command</th><th>Effect</th></tr>
+  <tr><td class="mono">.admin</td><td>Admin menu (teleports and more)</td></tr>
+  <tr><td class="mono">.bot / .b</td><td>Companion controls</td></tr>
+  <tr><td class="mono">.botparty / .bp</td><td>Find active bots and invite them to your party</td></tr>
+  <tr><td class="mono">.joinparty [name]</td><td>Ask to take over a bot's autonomous party</td></tr>
+  <tr><td class="mono">.botstatus / .bs</td><td>Bot overview panel; <code>.bs &lt;name&gt;</code> for detail</td></tr>
+  <tr><td class="mono">.botfriends / .bf</td><td>Friend list and constant-party management</td></tr>
+  <tr><td class="mono">.botpath / .bpath</td><td>Movement, waypoint and geodata path diagnostics</td></tr>
+  <tr><td class="mono">.sell</td><td>Sell all unequipped non-Adena items at 50% value</td></tr>
+  <tr><td class="mono">.afksell / .afkbuy / .afkstop</td><td>Persistent AFK shop in a peace zone</td></tr>
+  <tr><td class="mono">.trade</td><td>Bot trade window with the targeted SimPlayer</td></tr>
+  <tr><td class="mono">.leave / .kick &lt;name&gt;</td><td>Dismiss all / one companion</td></tr>
+  <tr><td class="mono">.go</td><td>Arena PvP</td></tr>
+  <tr><td class="mono">/invite</td><td>While targeting a bot, recruit it as a companion</td></tr>
+</table>
+
+<p>Nearby bots also respond to plain chat: <code>hi</code>, <code>follow</code>, <code>wait</code>,
+<code>hunt</code>, <code>heal</code>, <code>buff</code>.</p>
+
+<div class="box warn">
+  <span class="lbl">Before friends join LIVE</span>
+  <p>Upstream review note #122 flags that admin menu commands may be reachable by unauthorised
+  clients. Harmless when you are alone; with friends on the server, anyone could potentially open
+  <code>.admin</code>. This is Phase 0.4 in the handover and should be closed before your first game
+  day.</p>
+</div>
+
+<!-- ───────────────────────────── 12 ───────────────────────────── -->
+<h2>12. Troubleshooting</h2>
+
+<h3>Client sits at "connecting" or bounces back to login</h3>
+<p>Almost always the advertised address. The login server told the client to connect somewhere it
+cannot reach. Set <code>GameServer.advertisedHostname</code> explicitly (§7.1) and confirm port 7777
+is open. <code>Test-NetConnection</code> from the playing PC is the fastest diagnostic.</p>
+
+<h3>"User or password wrong" when you are sure it is right</h3>
+<p>Keyboard layout — see §5. Switch to English and retype. Your <code>dev</code> branch refuses
+mangled logins rather than silently creating a phantom account.</p>
+
+<h3>Server list is empty</h3>
+<p>The login server is up but the game server is not registered. Check the launcher log for the game
+server binding to 7777, and that nothing else holds that port:</p>
+<pre>netstat -ano | findstr ":7777"</pre>
+
+<h3>"database is locked"</h3>
+<p>Two server processes are sharing one SQLite file. Confirm the two copies are genuinely separate
+folders and that neither <code>local.ini</code> overrides <code>Database.path</code> to a common
+location. Upstream issue #117 covers this and is now closed — if you still hit it on current
+<code>main</code>, it is worth reporting with your config.</p>
+
+<h3>Server starts, world is empty</h3>
+<p>Be patient — seeding is delayed ~45 s and then builds gradually. Watch the Observer population
+counter. If it stays at zero, check <code>BotPopulation.enabled</code> and
+<code>maxPlayingPopulation</code> in your <code>local.ini</code>.</p>
+
+<h3>Poor performance</h3>
+<p>Lower <code>maxPlayingPopulation</code> first — it is the dominant cost. The hot/cold split means
+bots near you are far more expensive than the rest, so busy towns hurt most.</p>
+
+<h3>Geodata download fails</h3>
+<pre>npm run geodata                        <span class="c"># retry on its own</span>
+$env:L2NODE_GEODATA_DIR = "D:\geodata" <span class="c"># or reuse an existing extracted copy</span></pre>
+
+<h3>Cannot create a clan</h3>
+<p>Known upstream bug #132 — the Grand Master dialogue comes back empty. Still open. This is Phase
+0.3 in the handover and blocks a core requirement for a friends server.</p>
+
+<h3>Where the logs are</h3>
+<p><code>tmp\logs</code> in each copy (override with <code>L2NODE_LOG_DIR</code>). The launcher also
+streams them live in the browser, which is usually easier.</p>
+
+<!-- ───────────────────────────── 13 ───────────────────────────── -->
+<h2 class="pagebreak">13. Appendix: ports and paths</h2>
+
+<h3>Ports</h3>
+<table class="kv">
+  <tr><th>Service</th><th>Default</th><th>Test copy</th><th>Config key</th><th>Reachable by</th></tr>
+  <tr><td>Login server</td><td class="mono">2106</td><td class="mono">2116</td><td class="mono">AuthServer.port</td><td>Clients</td></tr>
+  <tr><td>Game server</td><td class="mono">7777</td><td class="mono">7787</td><td class="mono">GameServer.port</td><td>Clients</td></tr>
+  <tr><td>World Observer</td><td class="mono">8088</td><td class="mono">8098</td><td class="mono">WorldObserver.port</td><td>Browser</td></tr>
+  <tr><td>Launcher</td><td class="mono">8090</td><td class="mono">8100</td><td class="mono">L2NODE_LAUNCHER_PORT</td><td>Browser, local</td></tr>
+</table>
+
+<h3>Paths</h3>
+<table class="kv">
+  <tr><th>Path</th><th>What</th></tr>
+  <tr><td class="mono">config\default.ini</td><td>Committed defaults — do not edit</td></tr>
+  <tr><td class="mono">config\local.ini</td><td>Your overrides — git-ignored, never committed</td></tr>
+  <tr><td class="mono">tmp\nodel2.sqlite</td><td>The world database</td></tr>
+  <tr><td class="mono">tmp\saves\</td><td>Saved games</td></tr>
+  <tr><td class="mono">tmp\logs\</td><td>Server logs</td></tr>
+  <tr><td class="mono">data\Geodata\</td><td>~900 MB of geodata</td></tr>
+  <tr><td class="mono">&lt;client&gt;\system\l2.ini</td><td>Encrypted client config — edit via <code>l2ini.py</code></td></tr>
+</table>
+
+<h3>Environment overrides</h3>
+<table class="kv">
+  <tr><th>Variable</th><th>Purpose</th></tr>
+  <tr><td class="mono">L2NODE_LAUNCHER_PORT</td><td>Launcher port (default 8090)</td></tr>
+  <tr><td class="mono">L2NODE_LAUNCHER_HOST</td><td>Launcher bind address (default 127.0.0.1)</td></tr>
+  <tr><td class="mono">L2NODE_RUNTIME_DIR</td><td>Runtime directory (default <code>tmp</code>)</td></tr>
+  <tr><td class="mono">L2NODE_LOG_DIR</td><td>Log directory</td></tr>
+  <tr><td class="mono">L2NODE_CONFIG_FILE</td><td>Alternative config file path</td></tr>
+  <tr><td class="mono">L2NODE_PROGRESSION_RATE</td><td>Override the rate preset without editing config</td></tr>
+  <tr><td class="mono">L2NODE_GEODATA_URL / _SHA256 / _DIR</td><td>Geodata source overrides</td></tr>
+  <tr><td class="mono">OPENROUTER_API_KEY</td><td>Key without putting it in a file</td></tr>
+</table>
+
+<h3>npm scripts</h3>
+<table class="kv">
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td class="mono">npm start</td><td>Start the launcher</td></tr>
+  <tr><td class="mono">npm run check</td><td>Syntax check all ~1600 files — run before every commit</td></tr>
+  <tr><td class="mono">npm test</td><td>Full suite. Slow (10+ minutes)</td></tr>
+  <tr><td class="mono">npm run geodata</td><td>Download and install geodata</td></tr>
+  <tr><td class="mono">npm run wipe:bots</td><td>Clear the bot population, keep your character</td></tr>
+</table>
+
+<hr class="soft">
+<p style="font-size:8.8pt;color:#5b6672">
+Generated 27 September 2026 against upstream <span class="mono">2eeb182b</span>. Ports, config keys,
+script names and file paths in this guide were read from the repository, not from documentation.
+The client download links, <span class="mono">l2ini.py</span> and the Apple Silicon instructions come
+from the project's Discord <span class="mono">#guides</span> forum and are reproduced in
+<span class="mono">discord-export/guides.md</span>.
+</p>
+
+</body>
+</html>
